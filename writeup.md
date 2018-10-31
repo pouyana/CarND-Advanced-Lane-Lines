@@ -785,6 +785,28 @@ def pipeline(image, **params):
             add_line(line, frame_data)
     frame_data = line.get_default_frame_data()
     return draw_frame(image, frame_data)
+
+# The buffer the results of the line calculation in the last 10 iteration
+def process_image(image):
+    """
+    With this it is possble to pass the parameters to the pipeline.
+    Args:
+        image: The image that should be used, array like image or PIL image
+    Return:
+        The manipulated image
+    """
+    return pipeline(image, ** params)
+
+line = Line()
+params = {"line":line}
+import imageio
+imageio.plugins.ffmpeg.download()
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
+output_clip = 'project_view_output.mp4'
+clip1 = VideoFileClip("project_video.mp4")
+advanced_lane = clip1.fl_image(process_image)
+%time advanced_lane.write_videofile(output_clip, audio=False)
 ```
 
 The pipeline video can be found in the file [`project_video_output.mp4`](./project_video_output.mp4).
