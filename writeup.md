@@ -466,14 +466,21 @@ def draw_lane_boundires(img, sobel_thresh = (20, 150), hls_thresh=(150, 255)):
     top_down = get_binary_image(undist, sobel_thresh, hls_thresh)
     warped, M, Minv = transform_bird_eye(top_down)
     left_fit, right_fit, left_fitx, right_fitx, ploty, out_img = fit_polynomial(warped)
+    left_curverad, right_curverad, dest_from_center =  measure_curvature_real(left_fitx, right_fitx, ploty)
+    curvature = sanitize_curvature(left_curverad, right_curverad)
     warp_zero = np.zeros_like(warped).astype(np.uint8)
     color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
     pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
     pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
     pts = np.hstack((pts_left, pts_right))
     cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
-    newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0])) 
+    newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0]))
     result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
+    curvature_text = "Curvature:% 6.0fm" % curvature
+    position_text = "Position: % 5.2fm" % dest_from_center
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(result, curvature_text,(100,70), font, 2,(0,0,0),2)
+    cv2.putText(result, position_text, (150,120), font, 2,(0,0,0),2)
     return result
 ```
 
